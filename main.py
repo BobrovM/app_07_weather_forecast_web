@@ -1,24 +1,26 @@
 import streamlit as st
 import plotly.express as px
-
-
-def get_data(days):
-    dates = ["2022-25-10", "2022-26-10", "2022-27-10"]
-    temperatures = [10, 11, 15]
-    return dates, temperatures
+from backend import get_data
 
 
 st.title("Weather Forecast for the Next Days")
 
-place = st.text_input("Place")
+place = st.text_input("Place", value="Marseille")
 
-number_of_days = st.slider("Number of days", 1, 5)
+number_of_days = st.slider("Number of days", 1, 4)
 
 selection = st.selectbox("Data", ("Temperature", "Sky"))
 
 st.header(f"{selection} for the next {number_of_days} days in {place}")
 
-dates, temperatures = get_data(number_of_days)
+if place:
+    data = get_data(place, number_of_days)
 
-figure = px.line(x=dates, y=temperatures, labels={"x": "date", "y": "temperature"})
-st.plotly_chart(figure)
+    if selection == "Temperature":
+        data = [dict["main"]["temp"] for dict in data]
+        figure = px.line(x=dates, y=data, labels={"x": "date", "y": "temperature"})
+        st.plotly_chart(figure)
+
+    if selection == "Sky":
+        data = [dict["weather"][0]["main"] for dict in data]
+        st.image()
